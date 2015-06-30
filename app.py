@@ -58,7 +58,10 @@ class SnipeForm(Form):
 
     def save(self):
         """ Saves to Datastore. """
-        user = User(user=users.User(self.email.data))
+        # Use the email address as the ID to ensure that users are unique.
+        # This may change later on if we want to tie Google, Scarletmail, or
+        # OAuth accounts to the service.
+        user = User(user=users.User(self.email.data), id=self.email.data)
         user.put()
         snipe_id = '%s:%s:%s' % (self.subject.data,
                                  self.course_number.data,

@@ -9,6 +9,5 @@ class Snipe(ndb.Model):
     date = ndb.DateTimeProperty(auto_now_add=True)
 
 class User(ndb.Model):
-    """ Represents a user in the database (phone_number and email pair). """
+    """ Represents a user in the database. """
     user = ndb.UserProperty()
-    phone_number = ndb.StringProperty()
