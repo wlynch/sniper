@@ -3,3 +3,10 @@
 *.db
 secrets.py
 ENV
+.*.swp
+
+lib/
+man/
+bin/
+include/
+.Python
