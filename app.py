@@ -84,51 +84,6 @@ def home():
 def faq():
     return render_template('faq.html')
 
-@app.route('/test', methods=['GET', 'POST'])
-def ajaxtest():
-    result = {
-        'success': test(),
-    }
-
-    if not result['success']:
-        from cron import EMAIL_SENDER
-        from flaskext.mail import Message
-
-        message = Message('Sniper tests are failing', sender=EMAIL_SENDER)
-        message.body = 'FIX IT'
-        message.add_recipient('vaibhav2614@gmail.com')
-        mail.send(message)
-
-    return json.dumps(result)
-
-def test():
-    from cron import poll
-
-    soc = Soc()
-    math_courses = soc.get_courses(640)
-    open_courses = poll(640, result = True)
-    for dept, sections in open_courses.iteritems():
-        open_courses[dept] = [section.number for section in sections]
-
-    success = True
-
-    for math_course in math_courses:
-        course_number = math_course['courseNumber']
-
-        if course_number.isdigit():
-            course_number = str(int(course_number))
-
-        for section in math_course['sections']:
-            section_number = section['number']
-            if section_number.isdigit():
-                section_number = str(int(section_number))
-
-            if section['openStatus'] and not section_number in open_courses[course_number]:
-                raise Exception('Test failed')
-                success = False
-
-    return success
-
 
 def main():
     logging.getLogger().setLevel(logging.DEBUG)
