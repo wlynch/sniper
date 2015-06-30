@@ -13,6 +13,8 @@ import re
 import json
 import logging
 
+from google.appengine.api import users
+ 
 # Set up the Flask application
 app = Flask(__name__)
 
@@ -56,7 +58,8 @@ class SnipeForm(Form):
 
     def save(self):
         """ Saves to Datastore. """
-        user = User.get_or_insert(self.email.data)
+        user = User(user=users.User(self.email.data))
+        user.put()
         snipe_id = '%s:%s:%s' % (self.subject.data,
                                  self.course_number.data,
                                  self.section.data)
@@ -96,4 +99,4 @@ def main():
 
 
 if __name__ == '__main__':
-    test()
+    main()

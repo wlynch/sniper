@@ -3,11 +3,12 @@
 from flask.ext.mail import Message
 
 import urllib
-from legacy_models import db, Snipe
+from models import Snipe
 from soc import Soc
 from app import mail, app
 import datetime
 from collections import namedtuple
+import logging
 
 soc = Soc()
 
@@ -43,27 +44,32 @@ def poll(subject, result=False):
     # all of these course numbers are open
     open_courses = [course for course, open_sections in open_data.iteritems() if open_sections]
 
+    logging.info(open_courses)
+
     if result:
         return open_data
 
     if open_courses:
         # Notify people that were looking for these courses
-        snipes = Snipe.query.filter(Snipe.course_number.in_(open_courses), Snipe.subject==str(subject))
+        snipes = Snipe.query(Snipe.course_number.IN(open_courses), Snipe.subject==str(subject)).fetch()
+        logging.info(snipes)
         for snipe in snipes:
             for section in open_data[snipe.course_number]:
-                if section.number == snipe.section:
+                if section.number == str(snipe.section):
                     notify(snipe, section.index)
     else:
-        app.logger.warning('Subject "%s" has no open courses' % (subject))
+        logging.warning('Subject "%s" has no open courses' % (subject))
 
 def notify(snipe, index):
     """ Notify this snipe that their course is open"""
     course = '%s:%s:%s' % (snipe.subject, snipe.course_number, snipe.section)
+    user = snipe.key.parent().get().user
+    logging.info(user)
 
-    if snipe.user.email:
+    if user.email():
 
         attributes = {
-            'email': snipe.user.email,
+            'email': user.email(),
             'subject': snipe.subject,
             'course_number': snipe.course_number,
             'section': snipe.section,
@@ -79,24 +85,23 @@ def notify(snipe, index):
         # send out the email
         message = Message('[Course Sniper](%s) is open' %(course), sender=EMAIL_SENDER)
         message.body = email_text
-        message.add_recipient(snipe.user.email)
-        message.add_recipient(snipe.user.email)
+        message.add_recipient(user.email())
 
+        logging.info(message)
         #mail.send(message)
+    
+    snipe.key.delete()
 
-    db.session.delete(snipe)
-    # Strip out user for analytics.
-    snipe.user = None
-    db.session.add(snipe)
-    db.session.commit()
+    logging.info('Notified user: %s about snipe %s' % (user, snipe))
 
-    app.logger.warning('Notified user: %s about snipe %s' % (snipe.user, snipe))
-
-
+@app.route('/cron/soc', methods=['GET', 'POST'])
+def main():
+    logging.getLogger().setLevel(logging.DEBUG)
+    subjects = Snipe.query(projection=[Snipe.subject], distinct=True).fetch()
+    logging.info(subjects)
+    for subject in subjects:
+        poll(subject.subject)
+    return '', 200
 
 if __name__ == '__main__':
-    # get all the courses that should be queried.
-    app.logger.warning("----------- Running the Cron %s " % (str(datetime.datetime.now())))
-    subjects = db.session.query(Snipe.subject).distinct().all()
-    for subject in subjects:
-        poll(subject[0])
+    main() 

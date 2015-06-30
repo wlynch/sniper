@@ -1,0 +1,4 @@
+cron:
+- description: Periodic crawl of Schedule of Classes
+  url: /cron/soc
+  schedule: every 15 minutes

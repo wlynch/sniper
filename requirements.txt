@@ -1,6 +1,6 @@
 # TODO: fix the versions
 Flask
 Flask-Mail
-Flask-SQLAlchemy
 WTForms
 requests
+glcoud
