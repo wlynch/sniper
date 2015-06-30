@@ -11,18 +11,11 @@ from soc import Soc
 from werkzeug.contrib.fixers import ProxyFix
 import re
 import json
-
 import logging
-from logging import Formatter, FileHandler
 
 # Set up the Flask application
 app = Flask(__name__)
 
-# Set up a file for logging
-file_handler = FileHandler('everything.log')
-file_handler.setLevel(logging.INFO)
-file_handler.setFormatter(Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
-app.logger.addHandler(file_handler)
 
 app.wsgi_app = ProxyFix(app.wsgi_app)
 
@@ -136,6 +129,11 @@ def test():
 
     return success
 
+
+def main():
+    logging.getLogger().setLevel(logging.DEBUG)
+    app.run(host='0.0.0.0', debug=True)
+
+
 if __name__ == '__main__':
     test()
-    app.run(host='0.0.0.0', debug=True)
