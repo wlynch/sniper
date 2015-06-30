@@ -3,7 +3,7 @@
 from flask.ext.mail import Message
 
 import urllib
-from models import db, Snipe
+from legacy_models import db, Snipe
 from soc import Soc
 from app import mail, app
 import datetime
