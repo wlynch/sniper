@@ -6,7 +6,7 @@ import requests
 
 class Soc:
     """ Communicates with Rutgers SOC """
-    def __init__(self, campus='NB', semester='12015', level='U,G'):
+    def __init__(self, campus='NB', semester='92015', level='U,G'):
         """ We always use certain parameters"""
         self.base_url = 'http://sis.rutgers.edu/soc'
         self.params = {
@@ -29,7 +29,7 @@ class Soc:
         r = requests.get(self.base_url + resource, params=params, headers=self.headers)
 
         if r.status_code == requests.codes.ok:
-            return r.json
+            return r.json()
 
         raise Exception('You made an invalid request %s: %s' % (r.status_code, r.text))
 
