@@ -4,7 +4,7 @@
 from flask import Flask, render_template, request
 from wtforms import Form, TextField, validators
 from wtforms.validators import StopValidation
-from legacy_models import Snipe, db, User
+from models import Snipe, User
 from flask.ext.mail import Mail
 from secrets import mail_username, mail_password
 from soc import Soc
@@ -55,12 +55,17 @@ class SnipeForm(Form):
         return True
 
     def save(self):
-        """ Saves to SQLAlchemy User and Snipe models """
-
-        snipe = Snipe.create(self.email.data, self.subject.data, self.course_number.data, self.section.data)
-
-        db.session.add(snipe)
-        db.session.commit()
+        """ Saves to Datastore. """
+        user = User.get_or_insert(self.email.data)
+        snipe_id = '%s:%s:%s' % (self.subject.data,
+                                 self.course_number.data,
+                                 self.section.data)
+        snipe = Snipe(parent=user.key,
+                      subject=self.subject.data,
+                      course_number=self.course_number.data,
+                      section=self.section.data,
+                      id=snipe_id)
+        snipe.put()
 
 
 @app.route('/', methods=['GET', 'POST'])
