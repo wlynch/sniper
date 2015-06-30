@@ -5,7 +5,7 @@ from flask import Flask, render_template, request
 from wtforms import Form, TextField, validators
 from wtforms.validators import StopValidation
 from models import Snipe, db, User
-from flaskext.mail import Mail
+from flask.ext.mail import Mail
 from secrets import mail_username, mail_password
 from soc import Soc
 from werkzeug.contrib.fixers import ProxyFix

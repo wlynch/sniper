@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """ This represents the cronjob that runs to check for course openings"""
-from flaskext.mail import Message
+from flask.ext.mail import Message
 
 import urllib
 from models import db, Snipe
@@ -82,9 +82,12 @@ def notify(snipe, index):
         message.add_recipient(snipe.user.email)
         message.add_recipient(snipe.user.email)
 
-        mail.send(message)
+        #mail.send(message)
 
     db.session.delete(snipe)
+    # Strip out user for analytics.
+    snipe.user = None
+    db.session.add(snipe)
     db.session.commit()
 
     app.logger.warning('Notified user: %s about snipe %s' % (snipe.user, snipe))
