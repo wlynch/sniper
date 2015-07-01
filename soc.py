@@ -8,7 +8,7 @@ current_semester = os.environ['semester']
 
 class Soc:
     """ Communicates with Rutgers SOC """
-    def __init__(self, campus='NB', semester=CURRENT_SEMESTER, level='U,G'):
+    def __init__(self, campus='NB', semester=current_semester, level='U,G'):
         """ We always use certain parameters"""
         self.base_url = 'http://sis.rutgers.edu/soc'
         self.params = {

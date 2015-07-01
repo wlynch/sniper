@@ -1,7 +1,6 @@
 """ This file sets up the Flask Application for sniper.
     Sniper is an application that hits the Rutgers SOC API and notifies users when a class opens up. """
 
-from google.appengine.ext import ndb
 from flask import Flask, render_template, request
 from wtforms import Form, TextField, validators
 from wtforms.validators import StopValidation
@@ -44,7 +43,6 @@ class SnipeForm(Form):
             form.section.data = str(int(form.section.data))
         return True
 
-    @ndb.transactional 
     def save(self):
         """ Saves to Datastore. """
         # Use the email address as the ID to ensure that users are unique.
@@ -52,17 +50,19 @@ class SnipeForm(Form):
         # OAuth accounts to the service.
         user = User(user=users.User(self.email.data), id=self.email.data)
         user.put()
-        snipe_id = '%s:%s:%s' % (self.subject.data,
-                                 self.course_number.data,
-                                 self.section.data)
+        snipe_id = '%s:%s:%s:%s' % (current_semester,
+                                    self.subject.data,
+                                    self.course_number.data,
+                                    self.section.data)
         snipe = Snipe.get_or_insert(snipe_id, parent = user.key)
-        snipe.subject=self.subject.data
-        snipe.course_number=self.course_number.data
-        snipe.section=self.section.data
+        snipe.semester = current_semester
+        snipe.subject = self.subject.data
+        snipe.course_number = self.course_number.data
+        snipe.section = self.section.data
         if not snipe.active:
         # Only add new timestamp if this is currently an inactive snipe
             snipe.time.append(SnipeTime())
-        snipe.active=True
+        snipe.active = True
         snipe.put()
 
 
@@ -92,7 +92,7 @@ def home():
         form = SnipeForm(request.args)
 
     return render_template('home.html', form=form, subjects=subjects,
-            semester=_SemesterString(soc.current_semester))
+            semester=_SemesterString(current_semester))
 
 
 @app.route('/faq', methods=['GET'])

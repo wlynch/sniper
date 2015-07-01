@@ -52,7 +52,8 @@ def poll(subject, result=False):
     if open_courses:
         # Notify people that were looking for these courses
         snipes = Snipe.query(Snipe.course_number.IN(open_courses), 
-                             Snipe.subject==str(subject),
+                             Snipe.semester == current_semester,
+                             Snipe.subject == str(subject),
                              Snipe.active == True).fetch()
         logging.debug(snipes)
         for snipe in snipes:
@@ -90,7 +91,6 @@ def notify(snipe, index):
         message.body = email_text
         message.to = user.email()
 
-        logging.debug(message)
         message.send()
     
     # Record time of snipe.
