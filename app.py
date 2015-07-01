@@ -9,7 +9,6 @@ from models import Snipe, User, SnipeTime
 from flask.ext.mail import Mail
 from secrets import mail_username, mail_password
 from soc import Soc
-from werkzeug.contrib.fixers import ProxyFix
 import re
 import json
 import logging
@@ -19,9 +18,6 @@ from google.appengine.api import users
  
 # Set up the Flask application
 app = Flask(__name__)
-
-
-app.wsgi_app = ProxyFix(app.wsgi_app)
 
 app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
 app.config['MAIL_PORT'] = 587
