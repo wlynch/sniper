@@ -90,7 +90,9 @@ def notify(snipe, index):
         logging.info(message)
         #mail.send(message)
     
-    snipe.key.delete()
+    # Record time of snipe.
+    snipe.snipe_date = datetime.datetime.now()
+    snipe.put()
 
     logging.info('Notified user: %s about snipe %s' % (user, snipe))
 

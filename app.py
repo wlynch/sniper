@@ -63,10 +63,12 @@ class SnipeForm(Form):
         # OAuth accounts to the service.
         user = User(user=users.User(self.email.data), id=self.email.data)
         user.put()
-        snipe_id = '%s:%s:%s' % (self.subject.data,
-                                 self.course_number.data,
-                                 self.section.data)
+        snipe_id = '%s:%s:%s:%s' % (soc.semester,
+                                    self.subject.data,
+                                    self.course_number.data,
+                                    self.section.data)
         snipe = Snipe(parent=user.key,
+                      semester=soc.semester,
                       subject=self.subject.data,
                       course_number=self.course_number.data,
                       section=self.section.data,
