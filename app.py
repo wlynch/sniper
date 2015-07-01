@@ -6,7 +6,7 @@ from flask import Flask, render_template, request
 from wtforms import Form, TextField, validators
 from wtforms.validators import StopValidation
 from models import Snipe, User, SnipeTime
-from soc import Soc
+from soc import Soc, current_semester
 import re
 import json
 import logging
@@ -66,6 +66,16 @@ class SnipeForm(Form):
         snipe.put()
 
 
+def _SemesterString(semester):
+    # Small helper to go from the semester code to a human-readable string.
+    # e.g. 92015 => Fall 2015
+    term = {
+        '1': 'Spring',
+        '9': 'Fall',
+    }[semester[0]]
+    return "%s %s" % (term, semester[1:])
+
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
     """ Handles the home page rendering."""
@@ -81,7 +91,8 @@ def home():
         # this trick allows us to prepopulate entries using links sent out in emails.
         form = SnipeForm(request.args)
 
-    return render_template('home.html', form=form, subjects=subjects)
+    return render_template('home.html', form=form, subjects=subjects,
+            semester=_SemesterString(soc.current_semester))
 
 
 @app.route('/faq', methods=['GET'])

@@ -14,3 +14,6 @@ handlers:
   upload: static/favicon.ico
 - url: /static
   static_dir: static
+
+env_variables:
+  semester: '92015'

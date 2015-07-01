@@ -3,15 +3,13 @@
 from google.appengine.api import mail
 
 from models import Snipe
-from soc import Soc
 from app import app
+from soc import Soc, current_semester
 
 from collections import namedtuple
 import datetime
 import logging
 import urllib
-
-soc = Soc()
 
 EMAIL_SENDER = "Course Sniper <sniper@rutgers.io>"
 
@@ -21,6 +19,7 @@ def poll(subject, result=False):
     """ Poll a subject for open courses. """
     app.logger.warning("Polling for %s" % (subject))
 
+    soc = Soc()
     # get all the course data from SOC
     courses = soc.get_courses(subject)
 
@@ -53,8 +52,8 @@ def poll(subject, result=False):
     if open_courses:
         # Notify people that were looking for these courses
         snipes = Snipe.query(Snipe.course_number.IN(open_courses), 
-                            Snipe.subject==str(subject),
-                            Snipe.active == True).fetch()
+                             Snipe.subject==str(subject),
+                             Snipe.active == True).fetch()
         logging.debug(snipes)
         for snipe in snipes:
             for section in open_data[snipe.course_number]:
@@ -82,7 +81,7 @@ def notify(snipe, index):
         # build the url for prepopulated form
         url = 'http://sniper.rutgers.io/?%s' % (urllib.urlencode(attributes))
 
-        register_url = 'https://sims.rutgers.edu/webreg/editSchedule.htm?login=cas&semesterSelection=92015&indexList=%s' % (index)
+        register_url = 'https://sims.rutgers.edu/webreg/editSchedule.htm?login=cas&semesterSelection=%s&indexList=%s' % (current_semester, index)
 
         email_text = 'A course (%s) that you were watching looks open. Its index number is %s. Click the link below to register for it!\n\n %s \n\n If you don\'t get in, visit this URL: \n\n %s \n\n to continue watching it.\n\n Send any feedback to sniper@rutgers.io' % (course, index, register_url, url)
 
@@ -111,6 +110,7 @@ def main():
     for subject in subjects:
         poll(subject.subject)
     return '', 200
+
 
 if __name__ == '__main__':
     main() 
