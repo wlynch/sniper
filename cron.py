@@ -11,7 +11,8 @@ import datetime
 import logging
 import urllib
 
-EMAIL_SENDER = "Course Sniper <sniper@rutgers.io>"
+#EMAIL_SENDER = "Course Sniper <sniper@rutgers.io>"
+EMAIL_SENDER = "Course Sniper <sniper@rutgers-sniper.appspotmail.com>"
 
 Section = namedtuple('Section', ['number', 'index'])
 
@@ -68,10 +69,8 @@ def notify(snipe, index):
     """ Notify this snipe that their course is open"""
     course = '%s:%s:%s' % (snipe.subject, snipe.course_number, snipe.section)
     user = snipe.key.parent().get().user
-    logging.info(user)
 
     if user.email():
-
         attributes = {
             'email': user.email(),
             'subject': snipe.subject,
