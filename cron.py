@@ -44,15 +44,17 @@ def poll(subject, result=False):
     # all of these course numbers are open
     open_courses = [course for course, open_sections in open_data.iteritems() if open_sections]
 
-    logging.info(open_courses)
+    logging.debug(open_courses)
 
     if result:
         return open_data
 
     if open_courses:
         # Notify people that were looking for these courses
-        snipes = Snipe.query(Snipe.course_number.IN(open_courses), Snipe.subject==str(subject)).fetch()
-        logging.info(snipes)
+        snipes = Snipe.query(Snipe.course_number.IN(open_courses), 
+                            Snipe.subject==str(subject),
+                            Snipe.active == True).fetch()
+        logging.debug(snipes)
         for snipe in snipes:
             for section in open_data[snipe.course_number]:
                 if section.number == str(snipe.section):
@@ -91,7 +93,9 @@ def notify(snipe, index):
         #mail.send(message)
     
     # Record time of snipe.
-    snipe.snipe_date = datetime.datetime.now()
+    snipe.time[-1].completed = datetime.datetime.now()
+    # Mark snipe as inactive.
+    snipe.active=False
     snipe.put()
 
     logging.info('Notified user: %s about snipe %s' % (user, snipe))
