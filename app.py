@@ -6,8 +6,6 @@ from flask import Flask, render_template, request
 from wtforms import Form, TextField, validators
 from wtforms.validators import StopValidation
 from models import Snipe, User, SnipeTime
-from flask.ext.mail import Mail
-from secrets import mail_username, mail_password
 from soc import Soc
 import re
 import json
@@ -18,14 +16,6 @@ from google.appengine.api import users
  
 # Set up the Flask application
 app = Flask(__name__)
-
-app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = mail_username
-app.config['MAIL_PASSWORD'] = mail_password
-
-mail = Mail(app)
 
 class SnipeForm(Form):
     """ Represents the Snipe form on the homepage. """
@@ -63,8 +53,8 @@ class SnipeForm(Form):
         user = User(user=users.User(self.email.data), id=self.email.data)
         user.put()
         snipe_id = '%s:%s:%s' % (self.subject.data,
-                                    self.course_number.data,
-                                    self.section.data)
+                                 self.course_number.data,
+                                 self.section.data)
         snipe = Snipe.get_or_insert(snipe_id, parent = user.key)
         snipe.subject=self.subject.data
         snipe.course_number=self.course_number.data
@@ -92,6 +82,7 @@ def home():
         form = SnipeForm(request.args)
 
     return render_template('home.html', form=form, subjects=subjects)
+
 
 @app.route('/faq', methods=['GET'])
 def faq():

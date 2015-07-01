@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 """ This represents the cronjob that runs to check for course openings"""
-from flask.ext.mail import Message
+from google.appengine.api import mail
 
-import urllib
 from models import Snipe
 from soc import Soc
-from app import mail, app
-import datetime
+from app import app
+
 from collections import namedtuple
+import datetime
 import logging
+import urllib
 
 soc = Soc()
 
@@ -62,6 +63,7 @@ def poll(subject, result=False):
     else:
         logging.warning('Subject "%s" has no open courses' % (subject))
 
+
 def notify(snipe, index):
     """ Notify this snipe that their course is open"""
     course = '%s:%s:%s' % (snipe.subject, snipe.course_number, snipe.section)
@@ -80,17 +82,17 @@ def notify(snipe, index):
         # build the url for prepopulated form
         url = 'http://sniper.rutgers.io/?%s' % (urllib.urlencode(attributes))
 
-        register_url = 'https://sims.rutgers.edu/webreg/editSchedule.htm?login=cas&semesterSelection=12015&indexList=%s' % (index)
+        register_url = 'https://sims.rutgers.edu/webreg/editSchedule.htm?login=cas&semesterSelection=92015&indexList=%s' % (index)
 
         email_text = 'A course (%s) that you were watching looks open. Its index number is %s. Click the link below to register for it!\n\n %s \n\n If you don\'t get in, visit this URL: \n\n %s \n\n to continue watching it.\n\n Send any feedback to sniper@rutgers.io' % (course, index, register_url, url)
 
         # send out the email
-        message = Message('[Course Sniper](%s) is open' %(course), sender=EMAIL_SENDER)
+        message = mail.EmailMessage(sender = EMAIL_SENDER, subject = '[Course Sniper](%s) is open' % (course),)
         message.body = email_text
-        message.add_recipient(user.email())
+        message.to(user.email())
 
-        logging.info(message)
-        #mail.send(message)
+        logging.debug(message)
+        message.send()
     
     # Record time of snipe.
     snipe.time[-1].completed = datetime.datetime.now()
@@ -99,6 +101,7 @@ def notify(snipe, index):
     snipe.put()
 
     logging.info('Notified user: %s about snipe %s' % (user, snipe))
+
 
 @app.route('/cron/soc', methods=['GET', 'POST'])
 def main():
