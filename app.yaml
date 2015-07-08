@@ -6,6 +6,8 @@ threadsafe: true
 handlers:
 - url: /
   script: app.app
+- url: /faq
+  script: app.app
 - url: /cron/soc
   script: cron.app
   login: admin
