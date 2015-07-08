@@ -90,7 +90,7 @@ def notify(snipe, index):
         message.body = email_text
         message.to = user.email()
 
-        message.send()
+        #message.send()
     
     # Record time of snipe.
     snipe.time[-1].completed = datetime.datetime.now()
